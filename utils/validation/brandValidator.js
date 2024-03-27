@@ -1,5 +1,6 @@
 
-const {check} = require('express-validator');
+const {check,body} = require('express-validator');
+const slugify = require('slugify');
 const validatorMiddleware = require('../../middleware/validatorMiddelware');
 
 exports.getBrandValidator = [
@@ -16,7 +17,11 @@ exports.createBrandValidator = [
         .isLength({min :3})
         .withMessage('Too short name ')
         .isLength({max :32})
-        .withMessage('Too long name'),
+        .withMessage('Too long name')
+        .custom((val , {req}) => {
+        req.body.slug = slugify(val);
+        return true
+    }),
         validatorMiddleware
 ];
 
@@ -26,6 +31,12 @@ exports.updateBrandValidator = [
         .withMessage("Can't update invalid category id format ")
         .notEmpty()
         .withMessage("Must enter id to update"),
+
+    check('name')
+    .custom((val , {req}) => {
+        req.body.slug = slugify(val);
+        return true
+    }),
         validatorMiddleware
 ];
 

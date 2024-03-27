@@ -86,34 +86,37 @@ exports.createProductValidator = [
         .optional()
         .isMongoId()
         .withMessage('Invalid ID formate')
-        // .custom((subcategoriesIds) =>
-        // SubCategory.find({ _id: { $exists: true, $in: subcategoriesIds } }).then(
-        //     (result) => {
-        //     if (result.length < 1 || result.length !== subcategoriesIds.length) {
-        //         return Promise.reject(new Error(`Invalid subcategories Ids`));
-        //     }
-        //     }
-        // )
-        // )
-        // .custom((val, { req }) =>
-        // SubCategory.find({ category: req.body.category }).then(
-        //     (subcategories) => {
-        //     const subCategoriesIdsInDB = [];
-        //     subcategories.forEach((subCategory) => {
-        //         subCategoriesIdsInDB.push(subCategory._id.toString());
-        //     });
-        //     // check if subcategories ids in db include subcategories in req.body (true)
-        //     const checker = (target, arr) => target.every((v) => arr.includes(v));
-        //     if (!checker(val, subCategoriesIdsInDB)) {
-        //         return Promise.reject(
-        //         new Error(`subcategories not belong to category`)
-        //         );
-        //     }
-        //     }
-        // )
-        // ),
+        .custom((subcategoriesIds) =>
+        SubCategory.find({ _id: { $exists: true, $in: subcategoriesIds } })
+        .then(
+            (result) => {
+            if (result.length < 1 || result.length !== subcategoriesIds.length) {
+                return Promise.reject(new Error(`Invalid subcategories Ids`));
+            }
+            }
+        )
+        )
+        .custom((val, { req }) =>
+        SubCategory.find({ category: req.body.category })
+        .then(
+            (subcategories) => {
+            const subCategoriesIdsInDB = [];
+            subcategories.forEach((subCategory) => {
+                subCategoriesIdsInDB.push(subCategory._id.toString());
+                console.log(subCategoriesIdsInDB);
+            });
+            // check if subcategories ids in db include subcategories in req.body (true)
+            const checker = (target, arr) => target.every((v) => arr.includes(v));
+            if (!checker(val, subCategoriesIdsInDB)) {
+                return Promise.reject(
+                new Error(`subcategories not belong to category`)
+                );
+            }   
+            }
+        )
+        ),
 
-    ,check('brand')
+    check('brand')
         .optional()
         .isMongoId()
         .withMessage('Invalid ID formate'),
@@ -146,13 +149,13 @@ exports.updateProductValidator = [
     check('id')
         .isMongoId()
         .withMessage('Invalid ID formate'),
-
-    // body('title')
-    //     .optional()
-    //     .custom((val, { req }) => {
-    //     req.body.slug = slugify(val);
-    //     return true;
-    //     }),
+        
+    body('title')
+        .optional()
+        .custom((val , {req}) => {
+            req.body.slug = slugify(val);
+            return true
+        }),
     validatorMiddleware,
 ];
 

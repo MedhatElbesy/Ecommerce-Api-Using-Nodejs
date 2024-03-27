@@ -46,7 +46,7 @@ const productSchema = new mongoose.Schema(
             ref:'Category',
             required:[true , 'Product must be belong to category']
         },
-        subcategory:[{
+        subcategories:[{
             type:mongoose.Schema.ObjectId,
             ref:'subCategory'
         }],
@@ -54,7 +54,7 @@ const productSchema = new mongoose.Schema(
             type:mongoose.Schema.ObjectId,
             ref:'Brand'
         },
-        ratingsAvarage:{
+        ratingsAverage:{
             type:Number,
             min:[1, "Rating must be above or equal one"],
             max:[5, "Rating must be below or equal five"],
@@ -70,5 +70,12 @@ const productSchema = new mongoose.Schema(
         timestamp:true
     }
     );
-    
+    //mongoose mw
+    productSchema.pre(/^find/,function (next){
+        this.populate({
+            path:'category',
+            select:'name -_id',
+        })
+        next();
+    } );
 module.exports = mongoose.model('Product' , productSchema );
