@@ -1,9 +1,61 @@
 // const slugify = require('slugify');
-// const asyncHandeller = require('express-async-handler');
-const CategoryModel = require('../models/categoryModel');
-// const ApiError = require('../utils/apiError');
+// const multer  = require('multer');
 // const ApiFeaturesClass = require('../utils/apiFeatures');
+// const ApiError = require('../utils/apiError');
+const sharp = require('sharp');
+const { v4: uuidv4 } = require('uuid');
+const asyncHandeller = require('express-async-handler');
+
 const handeller = require('./handellers');
+const {uploadeSingleImage} = require('../middleware/uploadeImageMiddleware')
+const CategoryModel = require('../models/categoryModel');
+
+//disk storage engine
+// const multerStorage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, 'uploads/categories')
+//     },
+//     filename: function (req, file, cb) {
+//         const extention = file.mimetype.split("/")[1];
+//         const uniqueFileName = `category-${uuidv4()}-${Date.now()}.${extention}`;
+//         cb(null,uniqueFileName);
+//     }
+// });
+
+//memory storage 
+// const multerStorage = multer.memoryStorage()
+// const multerFilter = function(req , file , cb){
+//     if(file.mimetype.startsWith("image")){
+//         cb(null , true);
+//     }else{
+//         cb(new ApiError("only images allowed" , 400) , false);
+//     }
+// };
+// const upload = multer({ storage:multerStorage ,fileFilter:multerFilter})
+exports.uploadCategoryImage = uploadeSingleImage("image");
+
+exports.resizeImage = asyncHandeller( async(req , res , next) =>{
+    const uniqueFileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
+    // console.log(req.file);
+    await sharp(req.file.buffer)
+        .resize(600,600)
+        .toFormat("jpeg")
+        .jpeg({quality:90})
+        .toFile(`uploads/categories/${uniqueFileName}`);
+    
+        //save image in db
+    req.body.image = uniqueFileName ;
+    next();
+});
+
+
+
+
+
+
+
+
+
 
 
 //@desc get list of categories

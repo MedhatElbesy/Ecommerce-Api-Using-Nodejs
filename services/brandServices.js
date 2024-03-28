@@ -1,11 +1,30 @@
 // const slugify = require('slugify');
-// const asyncHandeller = require('express-async-handler');
-const BrandModel = require('../models/brandModel');
+const asyncHandeller = require('express-async-handler');
+const { v4: uuidv4 } = require('uuid');
+const sharp = require('sharp');
+
+const handeller = require('./handellers');
+const {uploadeSingleImage} = require('../middleware/uploadeImageMiddleware');
 // const ApiError = require('../utils/apiError');
 // const ApiFeaturesClass = require('../utils/apiFeatures');
-const handeller = require('./handellers');
+const BrandModel = require('../models/brandModel');
 
 
+exports.uploadBrandImage = uploadeSingleImage("image");
+
+exports.resizeImage = asyncHandeller( async(req , res , next) =>{
+    const uniqueFileName = `brand-${uuidv4()}-${Date.now()}.jpeg`;
+    // console.log(req.file);
+    await sharp(req.file.buffer)
+        .resize(600,600)
+        .toFormat("jpeg")
+        .jpeg({quality:90})
+        .toFile(`uploads/brands/${uniqueFileName}`);
+    
+        //save image in db
+    req.body.image = uniqueFileName ;
+    next();
+});
 //@desc get list of brands
 //@route post /api/v1/brands
 //@access public

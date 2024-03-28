@@ -78,4 +78,13 @@ const productSchema = new mongoose.Schema(
         })
         next();
     } );
+
+    // categorySchema.post('init',(doc) => {
+    //     //return image url + image name
+    //     if(doc.image){
+    //         const imageUrl = `${process.env.BASE_URL}/caregories/${doc.image}`;
+    //         doc.image = imageUrl;
+    //     }
+    // });
+
 module.exports = mongoose.model('Product' , productSchema );
